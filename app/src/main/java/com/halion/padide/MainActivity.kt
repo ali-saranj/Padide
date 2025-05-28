@@ -65,8 +65,12 @@ class MainActivity : ComponentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()
+
+        // open new app
         setContent {
             PadideTheme {
+                openApp()
+
                 var locked by remember { mutableStateOf(false) }
                 var url by remember { mutableStateOf(loadSavedUrl(this)) }
                 BackHandler {
@@ -104,6 +108,17 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    private fun openApp() {
+        val packageName = "ir.sep.android.smartpos"
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        if (intent != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Smartpos not installed", Toast.LENGTH_SHORT).show()
         }
     }
 

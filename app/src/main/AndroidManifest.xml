@@ -22,11 +22,13 @@
             android:theme="@style/Theme.Padide">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
 
         <receiver
             android:name=".BootReceiver"
@@ -39,4 +41,7 @@
 
     </application>
 
+    <queries>
+        <package android:name="ir.sep.android.smartpos" />
+    </queries>
 </manifest>
