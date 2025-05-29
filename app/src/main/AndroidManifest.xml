@@ -41,7 +41,7 @@
 
     </application>
 
-    <queries>
-        <package android:name="ir.sep.android.smartpos" />
-    </queries>
+<!--    <queries>-->
+    <!--        <package android:name="ir.sep.android.smartpos" />-->
+    <!--    </queries>-->
 </manifest>
