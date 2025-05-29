@@ -27,10 +27,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,13 +62,10 @@ class MainActivity : ComponentActivity() {
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        hideSystemUI()
 
-        // open new app
+
         setContent {
             PadideTheme {
-                openApp()
-
                 var locked by remember { mutableStateOf(false) }
                 var url by remember { mutableStateOf(loadSavedUrl(this)) }
                 BackHandler {
@@ -93,12 +88,12 @@ class MainActivity : ComponentActivity() {
                         factory = {
                             WebView(it).apply {
                                 settings.javaScriptEnabled = true
-                                settings.domStorageEnabled = true
-                                settings.allowFileAccess = true
-                                settings.allowContentAccess = true
-                                settings.setSupportZoom(true)
-                                settings.builtInZoomControls = true
-                                settings.displayZoomControls = false
+//                                settings.domStorageEnabled = true
+//                                settings.allowFileAccess = true
+//                                settings.allowContentAccess = true
+//                                settings.setSupportZoom(true)
+//                                settings.builtInZoomControls = true
+//                                settings.displayZoomControls = false
                                 loadUrl(url)
                             }
                         },
@@ -108,17 +103,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-        }
-    }
 
-    private fun openApp() {
-        val packageName = "ir.sep.android.smartpos"
-        val intent = packageManager.getLaunchIntentForPackage(packageName)
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-        } else {
-            Toast.makeText(this, "Smartpos not installed", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -236,7 +221,8 @@ fun saveUrl(url: String, context: Context) {
 
 fun loadSavedUrl(context: Context): String {
     val prefs = context.getSharedPreferences("padide_prefs", Context.MODE_PRIVATE)
-    return prefs.getString("saved_url", "https://pand-co.com/") ?: "https://pand-co.com/"
+    return prefs.getString("saved_url", "https://www.webpos.loanpand.ir/13523080")
+        ?: "https://www.webpos.loanpand.ir/13523080"
 }
 
 fun isMyAppDefaultLauncher(context: Context): Boolean {
