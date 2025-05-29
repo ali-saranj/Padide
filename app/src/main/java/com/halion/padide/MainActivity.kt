@@ -10,7 +10,9 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowInsets
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -88,12 +90,15 @@ class MainActivity : ComponentActivity() {
                         factory = {
                             WebView(it).apply {
                                 settings.javaScriptEnabled = true
-//                                settings.domStorageEnabled = true
-//                                settings.allowFileAccess = true
-//                                settings.allowContentAccess = true
-//                                settings.setSupportZoom(true)
-//                                settings.builtInZoomControls = true
-//                                settings.displayZoomControls = false
+                                settings.domStorageEnabled = true
+                                settings.useWideViewPort = true
+                                settings.loadWithOverviewMode = true
+                                settings.allowFileAccess = true
+                                settings.allowContentAccess = true
+                                settings.setSupportZoom(true)
+                                settings.builtInZoomControls = true
+                                settings.displayZoomControls = false
+                                webViewClient = WebViewClient()
                                 loadUrl(url)
                             }
                         },
@@ -109,7 +114,7 @@ class MainActivity : ComponentActivity() {
 
 
     private fun isAppPinned(): Boolean {
-        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         return am.isInLockTaskMode
     }
 
@@ -221,8 +226,8 @@ fun saveUrl(url: String, context: Context) {
 
 fun loadSavedUrl(context: Context): String {
     val prefs = context.getSharedPreferences("padide_prefs", Context.MODE_PRIVATE)
-    return prefs.getString("saved_url", "https://www.webpos.loanpand.ir/13523080")
-        ?: "https://www.webpos.loanpand.ir/13523080"
+    return prefs.getString("saved_url", "http://webpos.loanpand.ir/13523080")
+        ?: "http://webpos.loanpand.ir/13523080"
 }
 
 fun isMyAppDefaultLauncher(context: Context): Boolean {

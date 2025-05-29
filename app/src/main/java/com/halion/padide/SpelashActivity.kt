@@ -2,6 +2,8 @@ package com.halion.padide
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,7 +24,10 @@ class SpelashActivity : ComponentActivity() {
         setContent {
             PadideTheme {
                 openApp()
-                startActivity(Intent(this, MainActivity::class.java))
+                Handler(Looper.getMainLooper()).postDelayed({
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }, 3000) // 2 ثانیه
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting2(
                         name = "Android",
