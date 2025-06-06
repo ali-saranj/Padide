@@ -5,7 +5,8 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class PspPosinfoModel(
     @SerialName("CompanyName") val companyName: String = "SEP",
-    @SerialName("RequestType") val requestType: String = "getMerchantInfo"
+    @SerialName("RequestType") val requestType: String = "getMerchantInfo",
+    @SerialName("trxType") val trxType : String = "aa"
 )
 
 @Serializable
@@ -163,7 +164,6 @@ fun main() {
 
     val posInfo = PspPosinfoModel()
     println(json.encodeToString(posInfo))
-
 
     val verify = PspDoVerify(refNum = "123456789")
     println(json.encodeToString(verify))

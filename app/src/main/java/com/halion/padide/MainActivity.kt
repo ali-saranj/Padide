@@ -48,6 +48,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.halion.padide.ui.theme.PadideTheme
 import androidx.core.content.edit
 import com.halion.padide.data.core.WebSocketClient
+import com.halion.padide.data.core.pos.PosManager
+import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
@@ -71,31 +73,9 @@ class MainActivity : ComponentActivity() {
             PadideTheme {
 
 
-                var webSocketClient = WebSocketClient.instance
-                webSocketClient.setSocketUrl("ws://127.0.0.1:1372/")
-                webSocketClient.connect()
-
-                webSocketClient.setListener(object : WebSocketClient.SocketListener {
-                    override fun onMessage(message: String) {
-
-                    }
-
-                    override fun onConnected() {
-                        super.onConnected()
-                        webSocketClient.sendMessage(
-                            "{\n" +
-                                    "  \"CompanyName\": \"SEP\",\n" +
-                                    "  \"RequestType\": \"getMerchantInfo\"\n" +
-                                    "}"
-                        )
-
-                        webSocketClient.sendMessage(
-                            "{\n" +
-                                    "  \"CompanyName\": \"SEP\",\n" +
-                                    "  \"RequestType\": \"checkPaper\"\n" +
-                                    "}"
-                        )
-                    }
+                PosManager(WebSocketClient.instance, Json {
+                    ignoreUnknownKeys = true
+                    encodeDefaults = true
                 })
 
                 var locked by remember { mutableStateOf(false) }
