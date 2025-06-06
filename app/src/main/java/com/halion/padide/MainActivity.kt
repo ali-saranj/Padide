@@ -47,6 +47,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.halion.padide.ui.theme.PadideTheme
 import androidx.core.content.edit
+import com.halion.padide.data.core.WebSocketClient
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
@@ -68,6 +69,35 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PadideTheme {
+
+
+                var webSocketClient = WebSocketClient.instance
+                webSocketClient.setSocketUrl("ws://127.0.0.1:1372/")
+                webSocketClient.connect()
+
+                webSocketClient.setListener(object : WebSocketClient.SocketListener {
+                    override fun onMessage(message: String) {
+
+                    }
+
+                    override fun onConnected() {
+                        super.onConnected()
+                        webSocketClient.sendMessage(
+                            "{\n" +
+                                    "  \"CompanyName\": \"SEP\",\n" +
+                                    "  \"RequestType\": \"getMerchantInfo\"\n" +
+                                    "}"
+                        )
+
+                        webSocketClient.sendMessage(
+                            "{\n" +
+                                    "  \"CompanyName\": \"SEP\",\n" +
+                                    "  \"RequestType\": \"checkPaper\"\n" +
+                                    "}"
+                        )
+                    }
+                })
+
                 var locked by remember { mutableStateOf(false) }
                 var url by remember { mutableStateOf(loadSavedUrl(this)) }
                 BackHandler {
