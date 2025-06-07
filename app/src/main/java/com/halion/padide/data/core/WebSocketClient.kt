@@ -67,6 +67,7 @@ class WebSocketClient private constructor() {
         fun callback(result: Boolean)
     }
 
+
     fun sendMessage(message: String) {
         if (webSocket != null) {
             val result = webSocket!!.send(message)
