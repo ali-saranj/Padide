@@ -62,6 +62,7 @@ class WebSocketClient private constructor() {
 
     }
 
+
     // interface
     interface SendMassage {
         fun callback(result: Boolean)
