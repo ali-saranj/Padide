@@ -1,8 +1,14 @@
 package com.halion.padide.data.core
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.NonUiContext
+import androidx.compose.ui.tooling.data.ContextCache
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -53,20 +59,12 @@ class WebSocketClient private constructor() {
         webSocket?.close(1000, "Client disconnected")
         webSocket = null
         Log.i(TAG, "WebSocket manually disconnected.")
+
     }
 
     // interface
     interface SendMassage {
         fun callback(result: Boolean)
-    }
-
-    fun sendMessage(message: String, callback: SendMassage) {
-        if (webSocket != null) {
-            val result = webSocket!!.send(message)
-            Log.d(TAG, "WebSocket message sent: $message")
-        } else {
-            Log.w(TAG, "WebSocket not connected, message not sent.")
-        }
     }
 
     fun sendMessage(message: String) {

@@ -6,7 +6,6 @@ import kotlinx.serialization.json.Json
 data class PspPosinfoModel(
     @SerialName("CompanyName") val companyName: String = "SEP",
     @SerialName("RequestType") val requestType: String = "getMerchantInfo",
-    @SerialName("trxType") val trxType : String = "aa"
 )
 
 @Serializable
