@@ -55,7 +55,6 @@ class WebSocketClient private constructor() {
         Log.i(TAG, "WebSocket manually disconnected.")
     }
 
-
     // interface
     interface SendMassage {
         fun callback(result: Boolean)
