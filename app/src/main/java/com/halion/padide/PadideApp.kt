@@ -11,7 +11,6 @@ class PadideApp : Application() {
         // koin
         startKoin {
             androidContext(this@PadideApp)
-
         }
     }
 }

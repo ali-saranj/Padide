@@ -23,11 +23,12 @@ class SpelashActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PadideTheme {
+//                startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
                 openApp()
                 Handler(Looper.getMainLooper()).postDelayed({
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
-                }, 3000) // 2 ثانیه
+                }, 3000)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting2(
                         name = "Android",
