@@ -1,5 +1,6 @@
 package com.halion.padide
 
+import android.R.attr.tint
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
@@ -25,9 +26,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ExitToApp
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,11 +55,9 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.halion.padide.ui.theme.PadideTheme
 import androidx.core.content.edit
-import com.halion.padide.data.core.WebSocketClient
-import com.halion.padide.data.core.pos.PosManager
-import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("SetJavaScriptEnabled")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,52 +77,88 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PadideTheme {
-
-
-                PosManager(WebSocketClient.instance, Json {
-                    ignoreUnknownKeys = true
-                    encodeDefaults = true
-                })
-
                 var locked by remember { mutableStateOf(false) }
-                var url by remember { mutableStateOf(loadSavedUrl(this)) }
+                var url by remember { mutableStateOf(loadSavedUrl(this@MainActivity)) }
                 BackHandler {
                     if (!isAppPinned()) {
                         locked = true
                     }
                 }
-                if (locked) {
-                    LockScreen { enteredUrl ->
-                        saveUrl(enteredUrl, this)
-                        url = enteredUrl
-                        locked = false
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            startLockTask()
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                titleContentColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            title = {
+                                Text("Padide POS")
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    if (isAppPinned()) {
+                                        stopLockTask()
+                                    } else {
+                                        finish()
+                                    }
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.ExitToApp,
+                                        contentDescription = "Exit"
+                                    )
+                                }
+                            },
+                            actions = {
+                                IconButton(onClick = {
+                                    stopLockTask()
+                                    startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Settings,
+                                        contentDescription = "Exit"
+                                    )
+                                }
+                            }
+                        )
+                    },
+                    content = { innerPadding ->
+                        Column(modifier = Modifier.padding(innerPadding)) {
+                            if (locked) {
+                                LockScreen { enteredUrl ->
+                                    saveUrl(enteredUrl, this@MainActivity)
+                                    url = enteredUrl
+                                    locked = false
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                        startLockTask()
+                                    }
+                                }
+                            } else {
+                                AndroidView(
+                                    modifier = Modifier.fillMaxSize(),
+                                    factory = {
+                                        WebView(it).apply {
+                                            settings.javaScriptEnabled = true
+                                            settings.domStorageEnabled = true
+                                            settings.useWideViewPort = true
+                                            settings.loadWithOverviewMode = true
+                                            settings.allowFileAccess = true
+                                            settings.allowContentAccess = true
+                                            settings.setSupportZoom(true)
+                                            settings.builtInZoomControls = true
+                                            settings.displayZoomControls = false
+                                            webViewClient = WebViewClient()
+                                            loadUrl(url)
+                                        }
+                                    },
+                                    update = {
+                                        it.loadUrl(url)
+                                    }
+                                )
+                            }
                         }
                     }
-                } else {
-                    AndroidView(
-                        modifier = Modifier.fillMaxSize(),
-                        factory = {
-                            WebView(it).apply {
-                                settings.javaScriptEnabled = true
-                                settings.domStorageEnabled = true
-                                settings.useWideViewPort = true
-                                settings.loadWithOverviewMode = true
-                                settings.allowFileAccess = true
-                                settings.allowContentAccess = true
-                                settings.setSupportZoom(true)
-                                settings.builtInZoomControls = true
-                                settings.displayZoomControls = false
-                                webViewClient = WebViewClient()
-                                loadUrl(url)
-                            }
-                        },
-                        update = {
-                            it.loadUrl(url)
-                        }
-                    )
-                }
+                )
+
             }
 
         }
