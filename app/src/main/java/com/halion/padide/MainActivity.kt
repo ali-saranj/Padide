@@ -130,7 +130,12 @@ class MainActivity : ComponentActivity() {
                                             onDismissRequest = { openDropMenu = false },
                                         ) {
                                             DropdownMenuItem(
-                                                text = { Text("تنظیمات", fontFamily = PadideFontFamily()) },
+                                                text = {
+                                                    Text(
+                                                        "تنظیمات",
+                                                        fontFamily = PadideFontFamily()
+                                                    )
+                                                },
                                                 onClick = {
                                                     openDropMenu = false
                                                     startActivity(Intent(Settings.ACTION_SETTINGS))
@@ -138,7 +143,12 @@ class MainActivity : ComponentActivity() {
                                             )
                                             HorizontalDivider()
                                             DropdownMenuItem(
-                                                text = { Text("خروج", fontFamily = PadideFontFamily()) },
+                                                text = {
+                                                    Text(
+                                                        "خروج",
+                                                        fontFamily = PadideFontFamily()
+                                                    )
+                                                },
                                                 onClick = {
                                                     openDropMenu = false
                                                     if (isAppPinned()) {
@@ -149,7 +159,12 @@ class MainActivity : ComponentActivity() {
                                             )
                                             HorizontalDivider()
                                             DropdownMenuItem(
-                                                text = { Text("تغیر شماره پایانه", fontFamily = PadideFontFamily()) },
+                                                text = {
+                                                    Text(
+                                                        "تغیر شماره پایانه",
+                                                        fontFamily = PadideFontFamily()
+                                                    )
+                                                },
                                                 onClick = {
                                                     openDropMenu = false
                                                     openDialogSetUrl = true
@@ -163,27 +178,7 @@ class MainActivity : ComponentActivity() {
                         },
                         content = { innerPadding ->
                             Column(modifier = Modifier.padding(innerPadding)) {
-                                AndroidView(
-                                    modifier = Modifier.fillMaxSize(),
-                                    factory = {
-                                        WebView(it).apply {
-                                            settings.javaScriptEnabled = true
-                                            settings.domStorageEnabled = true
-                                            settings.useWideViewPort = true
-                                            settings.loadWithOverviewMode = true
-                                            settings.allowFileAccess = true
-                                            settings.allowContentAccess = true
-                                            settings.setSupportZoom(true)
-                                            settings.builtInZoomControls = true
-                                            settings.displayZoomControls = false
-                                            webViewClient = WebViewClient()
-                                            loadUrl(url)
-                                        }
-                                    },
-                                    update = {
-                                        it.loadUrl(url)
-                                    }
-                                )
+                                WebViewScreen(url)
                             }
                             AnimatedVisibility(openDialogPass) {
                                 PadideDialog(
@@ -249,6 +244,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun WebViewScreen(url: String) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { context ->
+                WebView(context).apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.useWideViewPort = true
+                    settings.loadWithOverviewMode = true
+                    settings.allowFileAccess = true
+                    settings.allowContentAccess = true
+                    settings.setSupportZoom(true)
+                    settings.builtInZoomControls = true
+                    settings.displayZoomControls = false
+                    webViewClient = WebViewClient()
+                    loadUrl(url)
+                    // Save the current URL in the tag
+                    tag = url
+                }
+            },
+            update = { webView ->
+                val currentUrl = webView.tag as? String
+                if (currentUrl != url) {
+                    webView.loadUrl(url)
+                    webView.tag = url
+                }
+            }
+        )
+    }
 
     private fun isAppPinned(): Boolean {
         val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
