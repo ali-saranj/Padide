@@ -19,6 +19,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -55,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -66,6 +68,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.halion.padide.ui.theme.PadideTheme
 import androidx.core.content.edit
 import com.halion.padide.ui.components.PadideDialog
+import com.halion.padide.ui.theme.PadideFontFamily
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +109,13 @@ class MainActivity : ComponentActivity() {
                                     titleContentColor = MaterialTheme.colorScheme.primary,
                                 ),
                                 title = {
-                                    Text("پدیده نگاران")
+                                    Image(
+                                        modifier = Modifier
+                                            .height(50.dp)
+                                            .padding(end = 16.dp),
+                                        painter = painterResource(R.drawable.logo),
+                                        contentDescription = null
+                                    )
                                 },
                                 actions = {
                                     IconButton(onClick = {
@@ -118,7 +130,7 @@ class MainActivity : ComponentActivity() {
                                             onDismissRequest = { openDropMenu = false },
                                         ) {
                                             DropdownMenuItem(
-                                                text = { Text("تنظیمات") },
+                                                text = { Text("تنظیمات", fontFamily = PadideFontFamily()) },
                                                 onClick = {
                                                     openDropMenu = false
                                                     startActivity(Intent(Settings.ACTION_SETTINGS))
@@ -126,7 +138,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                             HorizontalDivider()
                                             DropdownMenuItem(
-                                                text = { Text("خروج") },
+                                                text = { Text("خروج", fontFamily = PadideFontFamily()) },
                                                 onClick = {
                                                     openDropMenu = false
                                                     if (isAppPinned()) {
@@ -137,7 +149,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                             HorizontalDivider()
                                             DropdownMenuItem(
-                                                text = { Text("تغیر شماره پایانه") },
+                                                text = { Text("تغیر شماره پایانه", fontFamily = PadideFontFamily()) },
                                                 onClick = {
                                                     openDropMenu = false
                                                     openDialogSetUrl = true
@@ -182,7 +194,12 @@ class MainActivity : ComponentActivity() {
                                         openDialogPass = false
                                     },
                                     onSubmit = { password ->
-                                        if (password == "1234") {
+                                        val current = LocalDateTime.now()
+
+                                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val PASSWORD = current.format(formatter)
+                                        if (password == "11${PASSWORD.replace("-", "")}51") {
+
                                             openDialogPass = false
                                             openDropMenu = true
                                         } else {

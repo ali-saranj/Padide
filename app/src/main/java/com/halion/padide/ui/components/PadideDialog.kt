@@ -16,9 +16,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.halion.padide.ui.theme.PadideFontFamily
 
 @Composable
 fun PadideDialog(
@@ -43,13 +45,16 @@ fun PadideDialog(
                     .background(Color.White, shape = RoundedCornerShape(16.dp))
                     .padding(16.dp)
             ) {
-                Text(message)
+                Text(message, fontFamily = PadideFontFamily())
                 Spacer(modifier = Modifier.padding(8.dp))
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = valueTextFiled,
+                    singleLine = true,
+                    maxLines = 1,
+                    textStyle = TextStyle(fontFamily = PadideFontFamily()),
                     onValueChange = { valueTextFiled = it },
-                    label = { Text(label) }
+                    label = { Text(label, fontFamily = PadideFontFamily()) },
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
                 Button(
@@ -59,7 +64,7 @@ fun PadideDialog(
                         onSubmit(valueTextFiled)
                     }
                 ) {
-                    Text("OK")
+                    Text("ثبت", fontFamily = PadideFontFamily())
                 }
             }
         }
