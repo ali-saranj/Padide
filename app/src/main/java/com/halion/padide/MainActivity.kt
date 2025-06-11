@@ -18,6 +18,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,18 +29,24 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExitToApp
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,14 +54,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.halion.padide.ui.theme.PadideTheme
 import androidx.core.content.edit
+import com.halion.padide.ui.components.PadideDialog
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -77,62 +88,69 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PadideTheme {
-                var locked by remember { mutableStateOf(false) }
+                var openDropMenu by remember { mutableStateOf(false) }
+                var openDialogPass by remember { mutableStateOf(false) }
+                var openDialogSetUrl by remember { mutableStateOf(false) }
                 var url by remember { mutableStateOf(loadSavedUrl(this@MainActivity)) }
-                BackHandler {
-                    if (!isAppPinned()) {
-                        locked = true
-                    }
-                }
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                titleContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                            title = {
-                                Text("Padide POS")
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = {
-                                    if (isAppPinned()) {
-                                        stopLockTask()
-                                    } else {
-                                        finish()
+
+                // rtl
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    titleContentColor = MaterialTheme.colorScheme.primary,
+                                ),
+                                title = {
+                                    Text("پدیده نگاران")
+                                },
+                                actions = {
+                                    IconButton(onClick = {
+                                        openDialogPass = true
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Menu,
+                                            contentDescription = "Menu"
+                                        )
+                                        DropdownMenu(
+                                            expanded = openDropMenu,
+                                            onDismissRequest = { openDropMenu = false },
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text("تنظیمات") },
+                                                onClick = {
+                                                    openDropMenu = false
+                                                    startActivity(Intent(Settings.ACTION_SETTINGS))
+                                                }
+                                            )
+                                            HorizontalDivider()
+                                            DropdownMenuItem(
+                                                text = { Text("خروج") },
+                                                onClick = {
+                                                    openDropMenu = false
+                                                    if (isAppPinned()) {
+                                                        stopLockTask()
+                                                    }
+                                                    finishAndRemoveTask()
+                                                }
+                                            )
+                                            HorizontalDivider()
+                                            DropdownMenuItem(
+                                                text = { Text("تغیر Url") },
+                                                onClick = {
+                                                    openDropMenu = false
+                                                    openDialogSetUrl = true
+                                                }
+                                            )
+
+                                        }
                                     }
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.ExitToApp,
-                                        contentDescription = "Exit"
-                                    )
                                 }
-                            },
-                            actions = {
-                                IconButton(onClick = {
-                                    stopLockTask()
-                                    startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Settings,
-                                        contentDescription = "Exit"
-                                    )
-                                }
-                            }
-                        )
-                    },
-                    content = { innerPadding ->
-                        Column(modifier = Modifier.padding(innerPadding)) {
-                            if (locked) {
-                                LockScreen { enteredUrl ->
-                                    saveUrl(enteredUrl, this@MainActivity)
-                                    url = enteredUrl
-                                    locked = false
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                        startLockTask()
-                                    }
-                                }
-                            } else {
+                            )
+                        },
+                        content = { innerPadding ->
+                            Column(modifier = Modifier.padding(innerPadding)) {
                                 AndroidView(
                                     modifier = Modifier.fillMaxSize(),
                                     factory = {
@@ -155,10 +173,60 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+                            AnimatedVisibility(openDialogPass) {
+                                PadideDialog(
+                                    openDialog = openDialogPass,
+                                    message = "برای دسترسی به تنظیمات رمز عبور را وارد کنید",
+                                    label = "رمز عبور",
+                                    onDismissRequest = {
+                                        openDialogPass = false
+                                    },
+                                    onSubmit = { password ->
+                                        if (password == "1234") {
+                                            openDialogPass = false
+                                            openDropMenu = true
+                                        } else {
+                                            openDialogPass = false
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "رمز عبور اشتباه است",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+                            }
+                            AnimatedVisibility(openDialogSetUrl) {
+                                PadideDialog(
+                                    openDialog = openDialogSetUrl,
+                                    message = "کد دستگاه را وارد کنید",
+                                    label = "کد دستگاه",
+                                    onDismissRequest = {
+                                        openDialogSetUrl = false
+                                    },
+                                    onSubmit = { newCode ->
+                                        if (newCode.isNotBlank()) {
+                                            url = "http://webpos.loanpand.ir/$newCode"
+                                            saveUrl(url, this@MainActivity)
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "آدرس سایت ذخیره شد",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } else {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "آدرس سایت نمی‌تواند خالی باشد",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        openDialogSetUrl = false
+                                    }
+                                )
+                            }
                         }
-                    }
-                )
-
+                    )
+                }
             }
 
         }
@@ -179,96 +247,6 @@ class MainActivity : ComponentActivity() {
         controller.hide(WindowInsets.Type.systemBars())
     }
 
-}
-
-
-@Composable
-fun LockScreen(onUnlock: (String) -> Unit) {
-    var step by remember { mutableStateOf(1) }
-    var password by remember { mutableStateOf("") }
-    var url by remember { mutableStateOf("") }
-    val correctPassword = "1234"
-    val context = LocalContext.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        when (step) {
-            1 -> {
-                Text("رمز عبور را وارد کنید")
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("رمز عبور") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-                    singleLine = true,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            if (password == correctPassword) {
-                                step = 2
-                            } else {
-                                Toast.makeText(context, "رمز عبور اشتباه است", Toast.LENGTH_SHORT)
-                                    .show()
-                                onUnlock(loadSavedUrl(context))
-                            }
-                        }
-                    )
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {
-                    if (password == correctPassword) {
-                        step = 2
-                    } else {
-                        Toast.makeText(context, "رمز عبور اشتباه است", Toast.LENGTH_SHORT).show()
-                        onUnlock(loadSavedUrl(context))
-                    }
-                }) {
-                    Text("مرحله بعد")
-                }
-            }
-
-            2 -> {
-                Text("لطفاً آدرس سایت را وارد کنید")
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text("آدرس سایت") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri),
-                    singleLine = true,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            if (url.isNotBlank()) {
-                                onUnlock(url)
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "آدرس سایت نمی‌تواند خالی باشد",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    )
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {
-                    if (url.isNotBlank()) {
-                        onUnlock(url)
-                    } else {
-                        Toast.makeText(context, "آدرس سایت نمی‌تواند خالی باشد", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }) {
-                    Text("ورود")
-                }
-            }
-        }
-    }
 }
 
 fun saveUrl(url: String, context: Context) {
