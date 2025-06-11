@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                             HorizontalDivider()
                                             DropdownMenuItem(
-                                                text = { Text("تغیر Url") },
+                                                text = { Text("تغیر شماره پایانه") },
                                                 onClick = {
                                                     openDropMenu = false
                                                     openDialogSetUrl = true
