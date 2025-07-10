@@ -25,6 +25,7 @@ class SpelashActivity : ComponentActivity() {
             PadideTheme {
 //                startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
                 openApp()
+
                 Handler(Looper.getMainLooper()).postDelayed({
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()

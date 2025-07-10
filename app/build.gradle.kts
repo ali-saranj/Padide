@@ -9,14 +9,22 @@ android {
     namespace = "com.halion.padide"
     compileSdk = 35
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.halion.padide"
         minSdk = 21
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            "String",
+            "APP_VERSION_NAME",
+            "\"${versionName}\""
+        ) // Uses existing versionName
     }
 
     buildTypes {

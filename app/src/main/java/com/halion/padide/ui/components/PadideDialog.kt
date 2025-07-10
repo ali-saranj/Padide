@@ -25,6 +25,7 @@ import com.halion.padide.ui.theme.PadideFontFamily
 @Composable
 fun PadideDialog(
     modifier: Modifier = Modifier,
+    value: String = "",
     message: String = "Padide",
     onDismissRequest: () -> Unit = { },
     label: String = "Enter your name",
@@ -32,8 +33,7 @@ fun PadideDialog(
     openDialog: Boolean = true,
 ) {
     var openDialog by remember { mutableStateOf(openDialog) }
-    var valueTextFiled by remember { mutableStateOf("") }
-
+    var valueTextFiled by remember { mutableStateOf(value) }
     if (openDialog) {
         Dialog(onDismissRequest = {
             openDialog = false
@@ -52,7 +52,6 @@ fun PadideDialog(
                     value = valueTextFiled,
                     singleLine = true,
                     maxLines = 1,
-                    textStyle = TextStyle(fontFamily = PadideFontFamily()),
                     onValueChange = { valueTextFiled = it },
                     label = { Text(label, fontFamily = PadideFontFamily()) },
                 )
