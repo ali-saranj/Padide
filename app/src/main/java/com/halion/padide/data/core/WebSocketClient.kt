@@ -1,14 +1,8 @@
 package com.halion.padide.data.core
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.NonUiContext
-import androidx.compose.ui.tooling.data.ContextCache
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
