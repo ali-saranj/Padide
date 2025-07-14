@@ -2,6 +2,7 @@ package com.halion.padide
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -78,9 +79,22 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            startLockTask()
+            val devicePolicyManager =
+                getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            if (devicePolicyManager.isLockTaskPermitted(packageName)) {
+                if (!isAppPinned()) {
+                    startLockTask()
+                } else {
+                    Log.d("MainActivity", "App is already pinned.")
+                }
+            } else {
+                Log.w("MainActivity", "LockTask is not permitted for this app on this device.")
+            }
+        } else {
+            Log.w("MainActivity", "LockTask is not permitted for this app on this device.")
         }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +105,7 @@ class MainActivity : ComponentActivity() {
         if (!isMyAppDefaultLauncher(this)) {
             setDefaultLauncher(this)
         }
+
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -445,20 +460,4 @@ fun isMyAppDefaultLauncher(context: Context): Boolean {
 fun setDefaultLauncher(context: Context) {
     val callHomeSettingIntent = Intent(Settings.ACTION_HOME_SETTINGS)
     context.startActivity(callHomeSettingIntent)
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PadideTheme {
-        Greeting("Android")
-    }
 }
