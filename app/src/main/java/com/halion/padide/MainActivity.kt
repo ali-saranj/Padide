@@ -3,6 +3,7 @@ package com.halion.padide
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -35,6 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +46,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -73,31 +76,8 @@ import java.time.format.DateTimeFormatter
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("SetJavaScriptEnabled")
-    @RequiresApi(Build.VERSION_CODES.R)
-
-
-    override fun onResume() {
-        super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val devicePolicyManager =
-                getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            if (devicePolicyManager.isLockTaskPermitted(packageName)) {
-                if (!isAppPinned()) {
-                    startLockTask()
-                } else {
-                    Log.d("MainActivity", "App is already pinned.")
-                }
-            } else {
-                Log.w("MainActivity", "LockTask is not permitted for this app on this device.")
-            }
-        } else {
-            Log.w("MainActivity", "LockTask is not permitted for this app on this device.")
-        }
-    }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -106,13 +86,9 @@ class MainActivity : ComponentActivity() {
             setDefaultLauncher(this)
         }
 
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-//            BackHandler {
-//
-//            }
 
             val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
             // Hide the status bar
@@ -177,9 +153,6 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onClick = {
                                                     openDropMenu = false
-                                                    if (isAppPinned()) {
-                                                        stopLockTask()
-                                                    }
                                                     startActivity(Intent(Settings.ACTION_SETTINGS))
                                                 }
                                             )
@@ -193,9 +166,6 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onClick = {
                                                     openDropMenu = false
-                                                    if (isAppPinned()) {
-                                                        stopLockTask()
-                                                    }
                                                     finishAndRemoveTask()
                                                 }
                                             )
@@ -352,7 +322,6 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         if (!isAppRunning(this, "ir.sep.android.smartpos")) {
-            startActivity(Intent(this, SpelashActivity::class.java))
             finish()
         }
     }
@@ -379,15 +348,6 @@ class MainActivity : ComponentActivity() {
                     settings.builtInZoomControls = false
                     settings.displayZoomControls = false
                     webViewClient = WebViewClient()
-                    addJavascriptInterface(object {
-                        @JavascriptInterface
-                        fun onElementClicked() {
-                            Log.d("test", "onElementClicked")
-                            runOnUiThread {
-                                stopLockTask()
-                            }
-                        }
-                    }, "AndroidInterface")
                     loadUrl(url)
                     Log.d("webview", "WebViewScreenUrl: $url")
                     // Save the current URL in the tag
@@ -403,11 +363,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         )
-    }
-
-    private fun isAppPinned(): Boolean {
-        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        return am.isInLockTaskMode
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
